@@ -2,6 +2,7 @@
 
 namespace Scandiweb\ScandiwebTest\Setup\Patch\Data;
 
+use Exception;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -18,6 +19,10 @@ use Magento\Framework\Exception\StateException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
+use Magento\InventoryApi\Api\Data\SourceItemInterface;
+use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\SourceItemsSaveInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Migration patch class
@@ -57,7 +62,27 @@ class AddSimpleProduct implements DataPatchInterface
     /**
      * @var CategoryCollectionFactory
      */
-    private CategoryCollectionFactory $categoryCollectionFactory;
+    protected CategoryCollectionFactory $categoryCollectionFactory;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected StoreManagerInterface $storeManager;
+
+    /**
+     * @var SourceItemInterfaceFactory
+     */
+    protected SourceItemInterfaceFactory $sourceItemFactory;
+
+    /**
+     * @var SourceItemsSaveInterface
+     */
+    protected SourceItemsSaveInterface $sourceItemsSaveInterface;
+
+    /**
+     * @var array
+     */
+    protected array $sourceItems = [];
 
     /**
      * Migration patch constructor.
@@ -69,6 +94,9 @@ class AddSimpleProduct implements DataPatchInterface
      * @param EavSetup $eavSetup
      * @param CategoryLinkManagementInterface $categoryLink
      * @param CategoryCollectionFactory $categoryCollectionFactory
+     * @param StoreManagerInterface $storeManager
+     * @param SourceItemInterfaceFactory $sourceItemFactory
+     * @param SourceItemsSaveInterface $sourceItemsSaveInterface
      */
     public function __construct(
         ModuleDataSetupInterface $setup,
@@ -77,7 +105,10 @@ class AddSimpleProduct implements DataPatchInterface
         State $appState,
         EavSetup $eavSetup,
         CategoryLinkManagementInterface $categoryLink,
-        CategoryCollectionFactory $categoryCollectionFactory
+        CategoryCollectionFactory $categoryCollectionFactory,
+        StoreManagerInterface $storeManager,
+        SourceItemInterfaceFactory $sourceItemFactory,
+        SourceItemsSaveInterface $sourceItemsSaveInterface
     ) {
         $this->appState = $appState;
         $this->productInterfaceFactory = $productInterfaceFactory;
@@ -86,10 +117,13 @@ class AddSimpleProduct implements DataPatchInterface
         $this->eavSetup = $eavSetup;
         $this->categoryLink = $categoryLink;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
+        $this->storeManager = $storeManager;
+        $this->sourceItemFactory = $sourceItemFactory;
+        $this->sourceItemsSaveInterface = $sourceItemsSaveInterface;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function apply(): void
     {
@@ -123,6 +157,15 @@ class AddSimpleProduct implements DataPatchInterface
 
         $product = $this->productRepository->save($product);
 
+        $sourceItem = $this->sourceItemFactory->create();
+        $sourceItem->setSourceCode('default');
+        $sourceItem->setQuantity(52);
+        $sourceItem->setSku($product->getSku());
+        $sourceItem->setStatus(SourceItemInterface::STATUS_IN_STOCK);
+        $this->sourceItems[] = $sourceItem;
+
+        $this->sourceItemsSaveInterface->execute($this->sourceItems);
+
         $categoryIds = $this->categoryCollectionFactory->create()
             ->addAttributeToFilter('name', ['in' => 'Men'])
             ->getAllIds();
@@ -130,11 +173,17 @@ class AddSimpleProduct implements DataPatchInterface
         $this->categoryLink->assignProductToCategories($product->getSku(), $categoryIds);
     }
 
+    /**
+     * @return array|string[]
+     */
     public static function getDependencies(): array
     {
         return [];
     }
 
+    /**
+     * @return array|string[]
+     */
     public function getAliases(): array
     {
         return [];
