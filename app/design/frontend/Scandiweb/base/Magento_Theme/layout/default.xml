@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceContainer name="header.container">
+        <container  name="notification-above-header" as="notification-above-header" label="Free shipping for all orders notification above header" htmlTag="div" htmlClass="free-shipping-header"  before="header.panel.wrapper"/>
+    </referenceContainer>
+    <referenceContainer name="notification-above-header">
+        <block ifconfig="carriers/freeshipping/active" class="Magento\Framework\View\Element\Template" name="free-shipping-header" template="Magento_Theme::html/free-shipping-header.phtml"/>
+    </referenceContainer>
+    <referenceContainer name="page.wrapper">
+        <block class="Magento\Newsletter\Block\Subscribe" name="form.subscribe" as="subscribe" before="-" template="Magento_Theme::subscribe.phtml" ifconfig="newsletter/general/active" after="page-footer"/>
+    </referenceContainer>
+</page>
+
+
