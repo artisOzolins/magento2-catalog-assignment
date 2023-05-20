@@ -5,6 +5,7 @@ namespace CertificationPractice\OrderExport\ViewModel;
 use http\Client\Request;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\UrlInterface;
@@ -33,21 +34,29 @@ class OrderDetails implements ArgumentInterface
     protected RequestInterface $request;
 
     /**
+     * @var AuthorizationInterface
+     */
+    protected AuthorizationInterface $authorization;
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
      * @param FormKey $formKey
      * @param UrlInterface $url
      * @param RequestInterface $request
+     * @param AuthorizationInterface $authorization
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         FormKey $formKey,
         UrlInterface $url,
-        RequestInterface $request
+        RequestInterface $request,
+        AuthorizationInterface $authorization
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->formKey = $formKey;
         $this->url = $url;
         $this->request = $request;
+        $this->authorization = $authorization;
     }
 
     /**
@@ -55,7 +64,8 @@ class OrderDetails implements ArgumentInterface
      */
     public function isAllowed(): bool
     {
-        return $this->scopeConfig->isSetFlag('sales/order_export/enabled');
+        return $this->scopeConfig->isSetFlag('sales/order_export/enabled')
+            && $this->authorization->isAllowed('CertificationPractice_OrderExport::OrderExport');
     }
 
     /**
