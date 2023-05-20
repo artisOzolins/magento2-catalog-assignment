@@ -1,0 +1,24 @@
+{
+    "name": "certificationpractice/module-order-export",
+    "description": "None",
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "php": ">=7.3",
+        "magento/module-sales": "103.*"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+    },
+    "type": "magento2-module",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "CertificationPractice\\OrderExport\\": ""
+        }
+    },
+    "version": "1.0"
+}
