@@ -12,7 +12,7 @@ define([
     'jquery-ui-modules/effect-fade'
 ], function ($, authenticationPopup, customerData, alert, confirm, _) {
     'use strict';
-
+    
     return function (widget) {
         $.widget('mage.sidebar', widget, {
             _initContent: function () {
@@ -53,7 +53,7 @@ define([
                 /**
                  * @param {jQuery.Event} event
                  */
-                events['click ' + this.options.button.remove] =  function (event) {
+                events['click ' + this.options.button.remove] = function (event) {
                     self._removeItem($(event.currentTarget));
                 };
 
