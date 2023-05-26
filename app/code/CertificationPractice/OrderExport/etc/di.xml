@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="CertificationPractice\OrderExport\Action\TransformOrderToArray">
+        <arguments>
+            <argument name="dataCollectors" xsi:type="array">
+                <item name="header_data" xsi:type="object">CertificationPractice\OrderExport\Collector\HeaderData</item>
+                <item name="item_data" xsi:type="object">CertificationPractice\OrderExport\Collector\ItemData</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="CertificationPractice\OrderExport\Collector\ItemData">
+        <arguments>
+            <argument name="allowedProductTypes" xsi:type="array">
+                <item name="simple" xsi:type="const">\Magento\Catalog\Model\Product\Type::TYPE_SIMPLE</item>
+                <item name="virtual" xsi:type="const">\Magento\Catalog\Model\Product\Type::TYPE_VIRTUAL</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="CertificationPractice\OrderExport\Api\Data\OrderExportDetailsSearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults" />
+
+    <virtualType name="CertificationPractice\OrderExport\Model\Api\SearchCriteria\OrderExportDetailsCollectionProcessor"
+                 type="Magento\Framework\Api\SearchCriteria\CollectionProcessor">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="filters" xsi:type="object">Magento\Cms\Model\Api\SearchCriteria\CollectionProcessor\BlockFilterProcessor</item>
+                <item name="sorting" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\SortingProcessor</item>
+                <item name="pagination" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\PaginationProcessor</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="CertificationPractice\OrderExport\Model\OrderExportDetailsRepository">
+        <arguments>
+            <argument name="collectionProcessor" xsi:type="object">CertificationPractice\OrderExport\Model\Api\SearchCriteria\OrderExportDetailsCollectionProcessor</argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="LoadExportDetailsIntoOrder" type="CertificationPractice\OrderExport\Plugin\LoadExportDetailsIntoOrder"/>
+    </type>
+</config>

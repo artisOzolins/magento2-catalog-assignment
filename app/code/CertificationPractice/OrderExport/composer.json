@@ -5,6 +5,7 @@
         "sort-packages": true
     },
     "require": {
+        "boldcommerce/magento2-ordercomments": "^1.6",
         "php": ">=7.3",
         "magento/module-sales": "103.*"
     },
